@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "nexushound"
+authors = [
+    {name = "Huskago", email = "tiago.ferreiralourenco@proton.me"},
+    {name = "", email = ""}
+]
+dynamic = ["version", "description"]
