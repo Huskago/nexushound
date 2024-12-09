@@ -34,6 +34,16 @@ class ModuleView(ctk.CTkFrame):
             widget.destroy()
 
         if self.current_module:
+            if self.current_module.is_modified:
+                warning_frame = ctk.CTkFrame(self.details_frame, fg_color="red")
+                warning_frame.pack(fill="x", padx=5, pady=5)
+                warning_label = ctk.CTkLabel(
+                    warning_frame,
+                    text="⚠️Warning: Module source code has been modified!",
+                    text_color="white"
+                )
+                warning_label.pack(pady=5)
+
             ctk.CTkLabel(self.details_frame, text=f"Name: {self.current_module.name}").pack(anchor="w")
             ctk.CTkLabel(self.details_frame, text=f"Version: {self.current_module.version}").pack(anchor="w")
             ctk.CTkLabel(self.details_frame, text=f"Description: {self.current_module.description}").pack(anchor="w")
@@ -71,5 +81,15 @@ class ModuleView(ctk.CTkFrame):
             self.current_module.create_ui(self.custom_ui_frame)
 
     def run_module(self):
-        if self.current_module:
-            self.current_module.run()
+        if not self.current_module:
+            return
+
+        if self.current_module.is_modified:
+            dialog = ctk.CTkInputDialog(
+                title="Warning",
+                text="This module has been modified. Are you sure you want to run it? (yes/no)"
+            )
+            if dialog.get_input().lower() != "yes":
+                return
+
+        self.current_module.run()
