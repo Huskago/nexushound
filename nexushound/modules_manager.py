@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import customtkinter as ctk
+from database.manager import DatabaseManager
 
 @dataclass
 class ModuleOption:
@@ -34,6 +35,14 @@ class ModuleBase:
         repository: str = ""
         self.options: List[ModuleOption] = []
         self._ui_elements: Dict[str, ctk.CTkBaseClass] = {}
+
+    @property
+    def is_modified(self) -> bool:
+        return hasattr(self, '_is_modified') and self._is_modified
+
+    @is_modified.setter
+    def is_modified(self, value: bool):
+        self._is_modified = value
 
     def create_ui(self, parent: ctk.CTkBaseClass) -> None:
         """Create custom UI elements for the module"""
@@ -251,6 +260,7 @@ class ModuleLoader:
         self.security = ModuleSecurity()
         self.loaded_modules: Dict[str, ModuleBase] = {}
         self.module_paths: Dict[str, str] = {}
+        self.db = DatabaseManager()
 
     def get_base_classes(self, node: ast.ClassDef) -> List[str]:
         """
@@ -396,6 +406,22 @@ class ModuleLoader:
                             f"Module {module_instance.name} has unsatisfied dependencies"
                         )
                         return None
+
+                    # Register in database
+                    module_data = {
+                        'name': module_instance.name,
+                        'category': module_instance.category,
+                        'description': module_instance.description,
+                        'version': module_instance.version,
+                        'authors': module_instance.authors,
+                        'dependencies': module_instance.dependencies,
+                    }
+
+                    module_id = self.db.register_module(module_data, Path(file_path))
+                    module_instance.id = module_id
+
+                    if not self.db.verify_module(module_instance.id, Path(file_path)):
+                        module_instance.is_modified = True
 
                     return module_instance
 

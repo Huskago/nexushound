@@ -25,10 +25,28 @@ class Sidebar(ctk.CTkFrame):
                 btn = ctk.CTkButton(
                     category_frame,
                     text=module.name,
-                    command=lambda m=module: self.select_module(m)
+                    command=lambda m=module: self.select_module(m),
+                    fg_color="red" if module.is_modified else None
                 )
+                self.create_tooltip(btn, "Module source code has been modified!" if module.is_modified else None)
                 btn.pack(fill="x", padx=5, pady=2)
-                self.module_buttons[module.name] = btn
+
+    def create_tooltip(self, widget, text):
+        if not text:
+            return
+
+        tooltip = ctk.CTkFrame(self)
+        tooltip_label = ctk.CTkLabel(tooltip, text=text)
+        tooltip_label.pack(padx=5, pady=2)
+
+        def show_tooltip(event):
+            tooltip.place(x=event.x_root, y=event.y_root)
+
+        def hide_tooltip(event):
+            tooltip.place_forget()
+
+        widget.bind('<Enter>', show_tooltip)
+        tooltip.bind('<Leave>', hide_tooltip)
 
     def clear_tree(self):
         for frame in self.winfo_children():
