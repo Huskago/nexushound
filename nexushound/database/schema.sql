@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS MODULE (
+    id_mod INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    description TEXT,
+    version TEXT,
+    authors TEXT,
+    dependencies TEXT,
+    module_hash TEXT NOT NULL,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS WORDLIST (
+    id_wordlist INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    elements TEXT,
+    nb_elements INTEGER,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS RESULT (
+    id_elem INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_mod INTEGER,
+    file_results TEXT NOT NULL,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    options TEXT,
+    FOREIGN KEY (id_mod) REFERENCES MODULE(id_mod)
+);

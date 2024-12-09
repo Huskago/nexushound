@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import customtkinter as ctk
+from database.manager import DatabaseManager
 
 @dataclass
 class ModuleOption:
@@ -251,6 +252,7 @@ class ModuleLoader:
         self.security = ModuleSecurity()
         self.loaded_modules: Dict[str, ModuleBase] = {}
         self.module_paths: Dict[str, str] = {}
+        self.db = DatabaseManager()
 
     def get_base_classes(self, node: ast.ClassDef) -> List[str]:
         """
@@ -397,6 +399,18 @@ class ModuleLoader:
                         )
                         return None
 
+                    # Register in database
+                    module_data = {
+                        'name': module_instance.name,
+                        'category': module_instance.category,
+                        'description': module_instance.description,
+                        'version': module_instance.version,
+                        'authors': module_instance.authors,
+                        'dependencies': module_instance.dependencies,
+                    }
+
+                    module_id = self.db.register_module(module_data, Path(file_path))
+                    module_instance.id = module_id
                     return module_instance
 
         except Exception as e:
