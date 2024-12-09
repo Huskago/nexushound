@@ -6,42 +6,46 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import customtkinter as ctk
 
+@dataclass
+class ModuleOption:
+    name: str
+    description: str
+    type: str
+    default: Any
+    required: bool = False
+    choices: List[str] = field(default_factory=list)
 
 @dataclass
 class ModuleBase:
-    """
-    Base class for all modules in the system.
-    Modules must inherit from this class to be recognized by the module finder.
+    def __init__(self):
+        name: str = ""
+        description: str = "No description."
+        version: str = "0.1.0"
+        category: str = ""
+        is_public: bool = False
+        authors: List[str] = []
+        homepage: str = ""
+        license: str = ""
+        dependencies: List[str] = []
+        min_python_version: str = "3.10"
+        tags: List[str] = []
+        repository: str = ""
+        self.options: List[ModuleOption] = []
+        self._ui_elements: Dict[str, ctk.CTkBaseClass] = {}
 
-    Properties:
-        name (str): Module name, automatically set to class name
-        description (str): Module description
-        version (str): Module version following semantic versioning
-        is_public (bool): Whether the module is intended for public use
-        authors (List[str]): List of module authors
-        homepage (str): URL to module's homepage or documentation
-        license (str): Module's license identifier
-        dependencies (List[str]): Required dependencies for the module
-        min_python_version (str): Minimum Python version required
-        category (str): Category for module classification
-        tags (List[str]): Tags for module classification
-        repository (str): URL to source code repository
-    """
+    def create_ui(self, parent: ctk.CTkBaseClass) -> None:
+        """Create custom UI elements for the module"""
+        pass
 
-    name: str = ""
-    description: str = "No description."
-    version: str = "0.1.0"
-    is_public: bool = False
-    authors: List[str] = field(default_factory=list)
-    homepage: str = ""
-    license: str = ""
-    dependencies: List[str] = field(default_factory=list)
-    min_python_version: str = "3.10"
-    category: str = ""
-    tags: List[str] = field(default_factory=list)
-    repository: str = ""
+    def get_ui_elements(self) -> Dict[str, ctk.CTkBaseClass]:
+        """Get all UI elements created by the module"""
+        return self._ui_elements
 
+    def run(self) -> None:
+        """Execute the module with current options"""
+        pass
 
 class ModuleSecurity:
     """
