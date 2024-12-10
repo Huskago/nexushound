@@ -6,6 +6,3 @@ def main():
     app = App()
     app.mainloop()
     db.close()
-
-if __name__ == "__main__":
-    main()
