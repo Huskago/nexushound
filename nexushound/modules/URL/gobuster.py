@@ -115,7 +115,7 @@ class GoBuster(ModuleBase):
 
     def save_results(self, results: List[Dict]) -> str:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        results_dir = Path("results/gobuster")
+        results_dir = Path("nexushound/results/gobuster")
         results_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = results_dir / f"scan_{timestamp}.json"

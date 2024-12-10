@@ -7,7 +7,7 @@ from nexushound.modules_manager import ModuleLoader
 
 
 class App(ctk.CTk):
-    def __init__(self):
+    def __init__(self, db=None):
         super().__init__()
 
         self.title("NexusHound")
@@ -16,7 +16,8 @@ class App(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # Initialize module loader
+        # Initialize module loader and database
+        self.db = db
         self.loader = ModuleLoader()
         self.modules = self.loader.load_all_modules()
 
