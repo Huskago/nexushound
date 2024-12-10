@@ -20,6 +20,8 @@ class DatabaseManager:
         self.conn.executescript(schema)
         self.conn.commit()
 
+        self.add_default_wordlists()
+
     def get_module_hash(self, module_path: Path) -> str:
         """Calculate SHA-256 hash of module file"""
         with open(module_path, 'rb') as f:
@@ -90,6 +92,31 @@ class DatabaseManager:
         self.conn.commit()
         return cursor.lastrowid
 
+    def add_default_wordlists(self):
+        default_wordlists = {
+            'big': 'wordlists/big.txt'
+        }
+
+        for name, path in default_wordlists.items():
+            if Path(path).exists():
+                query = "SELECT id_wordlist FROM WORDLIST WHERE name = ?"
+                cursor = self.conn.execute(query, (name,))
+                if not cursor.fetchone():
+                    try:
+                        encodings = ['utf-8', 'latin-1', 'ascii', 'utf-16']
+
+                        for encoding in encodings:
+                            try:
+                                with open(path, 'r', encoding=encoding) as f:
+                                    elements = [line.strip() for line in f if line.strip()]
+                                self.add_wordlist(name, elements)
+                                print(f"Added default wordlist: {name}")
+                                break
+                            except UnicodeDecodeError:
+                                continue
+                    except Exception as e:
+                        print(f"Error loading wordlist {name}: {e}")
+
     def get_wordlist(self, wordlist_id: int) -> Optional[Dict[str, Any]]:
         """Retrieve a wordlist by ID"""
         query = "SELECT * FROM WORDLIST WHERE id_wordlist = ?"
@@ -105,6 +132,11 @@ class DatabaseManager:
                 'last_updated': row[4]
             }
         return None
+
+    def get_wordlists(self) -> List[Dict[str, Any]]:
+        query = "SELECT id_wordlist, name FROM WORDLIST"
+        cursor = self.conn.execute(query)
+        return [{'id': row[0], 'name': row[1]} for row in cursor.fetchall()]
 
     def save_result(self, module_id: int, results_path: str, options: Dict[str, Any]) -> int:
         """Save module execution results"""
