@@ -289,12 +289,12 @@ class ModuleLoader:
     and dependency verification.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, db=None) -> None:
         """Initialize the ModuleLoader with security checker."""
         self.security = ModuleSecurity()
         self.loaded_modules: Dict[str, ModuleBase] = {}
         self.module_paths: Dict[str, str] = {}
-        self.db = DatabaseManager()
+        self.db = db or DatabaseManager()
 
     def get_base_classes(self, node: ast.ClassDef) -> List[str]:
         """

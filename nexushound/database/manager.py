@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 class DatabaseManager:
-    def __init__(self, db_path: str = "nexushound.db"):
+    def __init__(self, db_path: str = "nexushound/nexushound.db"):
         self.db_path = db_path
         self.conn = None
         self.init_db()
@@ -19,8 +19,6 @@ class DatabaseManager:
         self.conn = sqlite3.connect(self.db_path)
         self.conn.executescript(schema)
         self.conn.commit()
-
-        self.add_default_wordlists()
 
     def get_module_hash(self, module_path: Path) -> str:
         """Calculate SHA-256 hash of module file"""
@@ -94,7 +92,7 @@ class DatabaseManager:
 
     def add_default_wordlists(self):
         default_wordlists = {
-            'big': 'wordlists/big.txt'
+            'big': 'nexushound/wordlists/big.txt'
         }
 
         for name, path in default_wordlists.items():
