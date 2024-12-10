@@ -57,7 +57,7 @@ python -m nexushound
 
 Modules must inherit from the `ModuleBase` class and implement the required methods:
 
-````python
+```python
 class MyModule(ModuleBase):
     def __init__(self):
         super().__init__()
