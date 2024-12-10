@@ -106,7 +106,7 @@ Contributions are welcome! To contribute:
 4. Push to the branch
 5. Create a Pull Request
 
-##Security
+## Security
 
 **Important**: Use this tool only on systems for which you have explicit permission from testers.
 
