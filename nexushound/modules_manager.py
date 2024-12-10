@@ -6,42 +6,89 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import customtkinter as ctk
+from nexushound.database.manager import DatabaseManager
 
+@dataclass
+class ModuleOption:
+    name: str
+    description: str
+    type: str
+    default: Any
+    required: bool = False
+    choices: List[str] = field(default_factory=list)
+    _value: Any = None
+
+    @property
+    def value(self):
+        return self._value if self._value is not None else self.default
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
+
+class WordlistOption(ModuleOption):
+    def __init__(self, name: str, description: str, required: bool = False):
+        super().__init__(
+            name=name,
+            description=description,
+            type='wordlist',
+            default=None,
+            required=required
+        )
+        self.custom_path: Optional[str] = None
 
 @dataclass
 class ModuleBase:
-    """
-    Base class for all modules in the system.
-    Modules must inherit from this class to be recognized by the module finder.
+    def __init__(self):
+        name: str = ""
+        description: str = "No description."
+        version: str = "0.1.0"
+        category: str = ""
+        is_public: bool = False
+        authors: List[str] = []
+        homepage: str = ""
+        license: str = ""
+        dependencies: List[str] = []
+        min_python_version: str = "3.10"
+        tags: List[str] = []
+        repository: str = ""
+        self.options: List[ModuleOption] = []
+        self._ui_elements: Dict[str, ctk.CTkBaseClass] = {}
+        self.db = DatabaseManager()
+        self._option_values = {}
 
-    Properties:
-        name (str): Module name, automatically set to class name
-        description (str): Module description
-        version (str): Module version following semantic versioning
-        is_public (bool): Whether the module is intended for public use
-        authors (List[str]): List of module authors
-        homepage (str): URL to module's homepage or documentation
-        license (str): Module's license identifier
-        dependencies (List[str]): Required dependencies for the module
-        min_python_version (str): Minimum Python version required
-        category (str): Category for module classification
-        tags (List[str]): Tags for module classification
-        repository (str): URL to source code repository
-    """
+    @property
+    def is_modified(self) -> bool:
+        return hasattr(self, '_is_modified') and self._is_modified
 
-    name: str = ""
-    description: str = "No description."
-    version: str = "0.1.0"
-    is_public: bool = False
-    authors: List[str] = field(default_factory=list)
-    homepage: str = ""
-    license: str = ""
-    dependencies: List[str] = field(default_factory=list)
-    min_python_version: str = "3.10"
-    category: str = ""
-    tags: List[str] = field(default_factory=list)
-    repository: str = ""
+    @is_modified.setter
+    def is_modified(self, value: bool):
+        self._is_modified = value
 
+    def create_ui(self, parent: ctk.CTkBaseClass) -> None:
+        """Create custom UI elements for the module"""
+        pass
+
+    def get_ui_elements(self) -> Dict[str, ctk.CTkBaseClass]:
+        """Get all UI elements created by the module"""
+        return self._ui_elements
+
+    def get_option_value(self, name: str) -> Any:
+        """Get option value by name"""
+        option = next((opt for opt in self.options if opt.name == name), None)
+        if option:
+            return self._option_values.get(name, option.default)
+        return None
+
+    def set_option_value(self, name: str, value: Any) -> None:
+        """Set option value by name"""
+        self._option_values[name] = value
+
+    def run(self) -> None:
+        """Execute the module with current options"""
+        pass
 
 class ModuleSecurity:
     """
@@ -242,11 +289,12 @@ class ModuleLoader:
     and dependency verification.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, db=None) -> None:
         """Initialize the ModuleLoader with security checker."""
         self.security = ModuleSecurity()
         self.loaded_modules: Dict[str, ModuleBase] = {}
         self.module_paths: Dict[str, str] = {}
+        self.db = db or DatabaseManager()
 
     def get_base_classes(self, node: ast.ClassDef) -> List[str]:
         """
@@ -392,6 +440,22 @@ class ModuleLoader:
                             f"Module {module_instance.name} has unsatisfied dependencies"
                         )
                         return None
+
+                    # Register in database
+                    module_data = {
+                        'name': module_instance.name,
+                        'category': module_instance.category,
+                        'description': module_instance.description,
+                        'version': module_instance.version,
+                        'authors': module_instance.authors,
+                        'dependencies': module_instance.dependencies,
+                    }
+
+                    module_id = self.db.register_module(module_data, Path(file_path))
+                    module_instance.id = module_id
+
+                    if not self.db.verify_module(module_instance.id, Path(file_path)):
+                        module_instance.is_modified = True
 
                     return module_instance
 
