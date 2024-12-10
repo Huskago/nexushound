@@ -107,6 +107,12 @@ class ModuleView(ctk.CTkFrame):
             combo.pack(side="right", padx=5)
 
             entry = ctk.CTkEntry(frame, placeholder_text="Custom wordlist path")
+
+            def select_all(event):
+                event.widget.select_range(0, "end")
+                return "break"
+
+            entry.bind('<Control-a>', select_all)
             entry.pack(side="right", padx=5)
 
             def on_select(choice):
@@ -130,20 +136,28 @@ class ModuleView(ctk.CTkFrame):
                 self.current_module._option_values[option.name] = choice
             widget.configure(command=on_select)
             widget.pack(side="right", padx=5)
+
         elif option.type == "bool":
             widget = ctk.CTkCheckBox(frame, text="")
             def on_toggle():
                 self.current_module._option_values[option.name] = widget.get()
             widget.configure(command=on_toggle)
             widget.pack(side="right", padx=5)
+
         elif option.type == "str":
             widget = ctk.CTkEntry(frame)
             widget.insert(0, option.default)
             widget.pack(side="right", padx=5)
+
+            def select_all(event):
+                event.widget.select_range(0, "end")
+                return "break"
+
             def on_change(event):
                 self.current_module._option_values[option.name] = widget.get()
 
             widget.bind('<KeyRelease>', on_change)
+            widget.bind('<Control-a>', select_all)
 
     def update_custom_ui(self):
         for widget in self.custom_ui_frame.winfo_children():
