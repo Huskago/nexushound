@@ -17,6 +17,16 @@ class ModuleOption:
     default: Any
     required: bool = False
     choices: List[str] = field(default_factory=list)
+    _value: Any = None
+
+    @property
+    def value(self):
+        return self._value if self._value is not None else self.default
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
 
 class WordlistOption(ModuleOption):
     def __init__(self, name: str, description: str, required: bool = False):
@@ -46,6 +56,8 @@ class ModuleBase:
         repository: str = ""
         self.options: List[ModuleOption] = []
         self._ui_elements: Dict[str, ctk.CTkBaseClass] = {}
+        self.db = DatabaseManager()
+        self._option_values = {}
 
     @property
     def is_modified(self) -> bool:
@@ -62,6 +74,17 @@ class ModuleBase:
     def get_ui_elements(self) -> Dict[str, ctk.CTkBaseClass]:
         """Get all UI elements created by the module"""
         return self._ui_elements
+
+    def get_option_value(self, name: str) -> Any:
+        """Get option value by name"""
+        option = next((opt for opt in self.options if opt.name == name), None)
+        if option:
+            return self._option_values.get(name, option.default)
+        return None
+
+    def set_option_value(self, name: str, value: Any) -> None:
+        """Set option value by name"""
+        self._option_values[name] = value
 
     def run(self) -> None:
         """Execute the module with current options"""

@@ -107,29 +107,43 @@ class ModuleView(ctk.CTkFrame):
             combo.pack(side="right", padx=5)
 
             entry = ctk.CTkEntry(frame, placeholder_text="Custom wordlist path")
+            entry.pack(side="right", padx=5)
 
             def on_select(choice):
                 if choice == 'Custom':
                     entry.pack(side="right", padx=5)
-                    option.custom_path = None
+                    self.current_module._option_values[option.name] = None
                 else:
                     entry.pack_forget()
-                    option.custom_path = None
-                    wordlist_id = int(choice.split('(')[-1].strip(')'))
-                    option.default = wordlist_id
+                    try:
+                        wordlist_id = int(choice.split('(')[1].split(')')[0])
+                        self.current_module._option_values[option.name] = wordlist_id
+                    except:
+                        print(f"Error parsing wordlist choice: {choice}")
 
             combo.configure(command=on_select)
             combo.set(choices[0])
 
         elif option.type == "choice" and option.choices:
             widget = ctk.CTkOptionMenu(frame, values=option.choices)
+            def on_select(choice):
+                self.current_module._option_values[option.name] = choice
+            widget.configure(command=on_select)
             widget.pack(side="right", padx=5)
         elif option.type == "bool":
             widget = ctk.CTkCheckBox(frame, text="")
+            def on_toggle():
+                self.current_module._option_values[option.name] = widget.get()
+            widget.configure(command=on_toggle)
             widget.pack(side="right", padx=5)
-        else:
+        elif option.type == "str":
             widget = ctk.CTkEntry(frame)
+            widget.insert(0, option.default)
             widget.pack(side="right", padx=5)
+            def on_change(event):
+                self.current_module._option_values[option.name] = widget.get()
+
+            widget.bind('<KeyRelease>', on_change)
 
     def update_custom_ui(self):
         for widget in self.custom_ui_frame.winfo_children():
