@@ -47,12 +47,42 @@ class ModuleView(ctk.CTkFrame):
                     text="⚠️Warning: Module source code has been modified!",
                     text_color="white"
                 )
-                warning_label.pack(pady=5)
+                warning_label.pack(side="left", padx=5, pady=5)
+
+                update_btn = ctk.CTkButton(
+                    warning_frame,
+                    text="Update Hash",
+                    command=self.update_module_hash,
+                    width=100
+                )
+                update_btn.pack(side="right", padx=5, pady=5)
 
             ctk.CTkLabel(self.details_frame, text=f"Name: {self.current_module.name}").pack(anchor="w")
             ctk.CTkLabel(self.details_frame, text=f"Version: {self.current_module.version}").pack(anchor="w")
             ctk.CTkLabel(self.details_frame, text=f"Description: {self.current_module.description}").pack(anchor="w")
             ctk.CTkLabel(self.details_frame, text=f"Authors: {', '.join(self.current_module.authors)}").pack(anchor="w")
+
+    def update_module_hash(self):
+        if not self.current_module or not hasattr(self.current_module, 'id'):
+            return
+
+        dialog = ctk.CTkInputDialog(
+            title="Confirm Update",
+            text="Are you sure you want to update the module hash? This will mark the current code as trusted. (yes/no)"
+        )
+
+        if dialog.get_input().lower() == "yes":
+            module_path = self.master.loader.module_paths.get(self.current_module.name)
+            if module_path:
+                new_hash = self.master.loader.db.get_module_hash(Path(module_path))
+                self.master.loader.db.conn.execute(
+                    "UPDATE MODULE SET module_hash = ? WHERE id_mod = ?",
+                    (new_hash, self.current_module.id)
+                )
+                self.master.loader.db.conn.commit()
+                self.current_module.is_modified = False
+                self.update_details()
+                self.master.sidebar.refresh_module_buttons()
 
     def update_options(self):
         for widget in self.options_frame.winfo_children():
