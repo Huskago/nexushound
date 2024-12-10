@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import customtkinter as ctk
-from database.manager import DatabaseManager
+from nexushound.database.manager import DatabaseManager
 
 @dataclass
 class ModuleOption:
