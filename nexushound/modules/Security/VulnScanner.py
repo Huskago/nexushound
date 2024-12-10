@@ -175,7 +175,7 @@ class VulnScanner(ModuleBase):
         vulnerabilities = asyncio.run(self.run_scan(url, checks, threads))
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        results_dir = Path("results/vuln_scanner")
+        results_dir = Path("nexushound/results/vuln_scanner")
         results_dir.mkdir(parents=True, exist_ok=True)
         file_path = results_dir / f"scan_{timestamp}.json"
 

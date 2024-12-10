@@ -109,7 +109,7 @@ class DNSEnumerator(ModuleBase):
         results = asyncio.run(self.enumerate_dns(domain, record_types))
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        results_dir = Path("results/dns_enum")
+        results_dir = Path("nexushound/results/dns_enum")
         results_dir.mkdir(parents=True, exist_ok=True)
         file_path = results_dir / f"dns_{timestamp}.json"
 

@@ -6,6 +6,6 @@ build-backend = "flit_core.buildapi"
 name = "nexushound"
 authors = [
     {name = "Huskago", email = "tiago.ferreiralourenco@proton.me"},
-    {name = "", email = ""}
+    {name = "mushin", email = "selyan.ben-messaoud@oteria.fr"}
 ]
 dynamic = ["version", "description"]
