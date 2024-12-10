@@ -1,2 +1,0 @@
-aiohttp==3.11.10
-customtkinter==5.2.2
