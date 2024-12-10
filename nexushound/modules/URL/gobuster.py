@@ -1,4 +1,4 @@
-from nexushound.modules_manager import ModuleBase, ModuleOption
+from nexushound.modules_manager import ModuleBase, ModuleOption, WordlistOption
 import customtkinter as ctk
 
 
@@ -27,11 +27,9 @@ class GoBuster(ModuleBase):
                 default="",
                 required=True
             ),
-            ModuleOption(
+            WordlistOption(
                 name="wordlist",
-                description="Path to wordlist file",
-                type="file",
-                default="",
+                description="Wordlist for directory/file enumeration",
                 required=True
             ),
             ModuleOption(
@@ -47,7 +45,7 @@ class GoBuster(ModuleBase):
                 type="int",
                 default=10,
                 required=False
-            ),
+            )
         ]
 
     def create_ui(self, parent: ctk.CTkBaseClass) -> None:

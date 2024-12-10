@@ -18,6 +18,17 @@ class ModuleOption:
     required: bool = False
     choices: List[str] = field(default_factory=list)
 
+class WordlistOption(ModuleOption):
+    def __init__(self, name: str, description: str, required: bool = False):
+        super().__init__(
+            name=name,
+            description=description,
+            type='wordlist',
+            default=None,
+            required=required
+        )
+        self.custom_path: Optional[str] = None
+
 @dataclass
 class ModuleBase:
     def __init__(self):
