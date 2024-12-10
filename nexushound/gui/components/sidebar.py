@@ -89,3 +89,6 @@ class Sidebar(ctk.CTkFrame):
 
         self.modules = filtered_modules
         self.create_category_tree()
+
+    def refresh_module_buttons(self):
+        self.create_category_tree()
