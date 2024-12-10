@@ -1,4 +1,8 @@
 import customtkinter as ctk
+from pathlib import Path
+
+from nexushound.modules_manager import WordlistOption
+
 
 class ModuleView(ctk.CTkFrame):
     def __init__(self, master):
@@ -37,6 +41,7 @@ class ModuleView(ctk.CTkFrame):
             if self.current_module.is_modified:
                 warning_frame = ctk.CTkFrame(self.details_frame, fg_color="red")
                 warning_frame.pack(fill="x", padx=5, pady=5)
+
                 warning_label = ctk.CTkLabel(
                     warning_frame,
                     text="⚠️Warning: Module source code has been modified!",
@@ -64,14 +69,37 @@ class ModuleView(ctk.CTkFrame):
 
         ctk.CTkLabel(frame, text=option.name).pack(side="left", padx=5)
 
-        if option.type == "choice" and option.choices:
+        if isinstance(option, WordlistOption):
+            wordlists = self.master.loader.db.get_wordlists()
+            choices = ['Custom'] + [f"{w['name']} ({w['id']})" for w in wordlists]
+
+            combo = ctk.CTkOptionMenu(frame, values=choices)
+            combo.pack(side="right", padx=5)
+
+            entry = ctk.CTkEntry(frame, placeholder_text="Custom wordlist path")
+
+            def on_select(choice):
+                if choice == 'Custom':
+                    entry.pack(side="right", padx=5)
+                    option.custom_path = None
+                else:
+                    entry.pack_forget()
+                    option.custom_path = None
+                    wordlist_id = int(choice.split('(')[-1].strip(')'))
+                    option.default = wordlist_id
+
+            combo.configure(command=on_select)
+            combo.set(choices[0])
+
+        elif option.type == "choice" and option.choices:
             widget = ctk.CTkOptionMenu(frame, values=option.choices)
+            widget.pack(side="right", padx=5)
         elif option.type == "bool":
             widget = ctk.CTkCheckBox(frame, text="")
+            widget.pack(side="right", padx=5)
         else:
             widget = ctk.CTkEntry(frame)
-
-        widget.pack(side="right", padx=5)
+            widget.pack(side="right", padx=5)
 
     def update_custom_ui(self):
         for widget in self.custom_ui_frame.winfo_children():
